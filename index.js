@@ -3,14 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const fs = require('fs');
 const connection = require('./service/db');
 const authentication = require('./routes/authRoutes');
-const { createPost, getPosts,getUserPosts } = require('./controllers/postController');
+const { createPost, getPosts, getUserPosts } = require('./controllers/postController');
 const { addComment } = require('./controllers/commentController');
 const { toggleLike } = require('./controllers/likeController');
 const verifyToken = require('./middleware/auth');
 const multer = require('multer');
-const fs = require('fs');  // Import fs
 
 // Database connection
 connection();
@@ -18,7 +18,7 @@ connection();
 // Initialize Express app
 const app = express();
 
-// Middlewares
+// Middleware
 app.use(cors()); // CORS middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -26,11 +26,13 @@ app.use(bodyParser.json());
 // Routes
 app.use('/auth', authentication);
 
-// Post routes
+// Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
+
+// Multer storage configuration for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/'); // Specify the directory to save files
@@ -40,10 +42,10 @@ const storage = multer.diskStorage({
   },
 });
 
-// Initialize `upload` middleware using the defined `storage`
+// Multer file filter to accept only image files
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1024 * 1024 * 5 },
+  limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|gif/;
     const mimetype = filetypes.test(file.mimetype);
@@ -56,7 +58,7 @@ const upload = multer({
   },
 }).single('image');
 
-// Enhanced error handling in the post route
+// Post route to create a new post
 app.post('/create-post', verifyToken, (req, res) => {
   upload(req, res, (err) => {
     if (err instanceof multer.MulterError) {
@@ -64,10 +66,16 @@ app.post('/create-post', verifyToken, (req, res) => {
     } else if (err) {
       return res.status(500).send({ message: 'File upload error', error: err.message });
     }
-    // Continue with your post creation
+
+    // Continue with your post creation logic
     createPost(req, res);
   });
-});app.get('/all', verifyToken, getPosts);
+});
+
+// Get all posts route
+app.get('/all', verifyToken, getPosts);
+
+// Get user posts route
 app.get('/user', verifyToken, getUserPosts);
 
 // Comment route
@@ -86,8 +94,8 @@ app.use((req, res) => {
   res.status(404).send('404: Not Found');
 });
 
-// Start server
+// Start the server
 const port = process.env.PORT || 5000;
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on port ${port}...`);
 });
