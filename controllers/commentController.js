@@ -1,4 +1,4 @@
-const Post = require('../models/Post');  // Assuming Post is the Mongoose model for posts
+const Post = require('../models/Posts');  // Assuming Post is the Mongoose model for posts
 const Comment = require('../models/coments');  // Assuming Comment is the Mongoose model for comments
 
 // Add Comment to a post
