@@ -24,17 +24,22 @@ exports.addComment = async (req, res) => {
 exports.getComments = async (req, res) => {
   const { postId } = req.params;  // Assuming postId is passed as a URL parameter
   try {
+    // Log the received postId for debugging
+    console.log('Received postId:', postId);
+
     // Find all comments for the given postId
     const comments = await Comment.find({ post: postId })
       .populate('user', 'username')  // Optional: Populate user details like username (if you have User model)
       .sort({ createdAt: -1 });  // Optional: Sort comments by creation date, descending order
 
-    if (!comments) {
+    if (!comments || comments.length === 0) {
       return res.status(404).json({ error: 'No comments found for this post' });
     }
 
-    res.status(200).json(comments);  // Respond with all comments
+    // Respond with all comments
+    return res.status(200).json(comments);  
   } catch (error) {
-    res.status(400).json({ error: 'Error fetching comments' });
+    console.error('Error fetching comments:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
