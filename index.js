@@ -81,7 +81,7 @@ app.put('/edit/:id', verifyToken, updatePost);
 app.delete('/delete/:id', verifyToken, deletePost);
 // Comment route
 app.post('/comments', verifyToken, addComment);
-app.get('/comments/:postId', verifyToken, addComment);
+app.get('/comments/:postId', verifyToken, getComment);
 
 // Like route
 app.post('/likes', verifyToken, toggleLike);
