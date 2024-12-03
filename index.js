@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const connection = require('./service/db');
 const authentication = require('./routes/authRoutes');
-const { createPost, getPosts, getUserPosts } = require('./controllers/postController');
+const { createPost, getPosts,getUserPosts,updatePost,deletePost } = require('./controllers/postController');
 const { addComment,getComments } = require('./controllers/commentController');
 const { toggleLike } = require('./controllers/likeController');
 const verifyToken = require('./middleware/auth');
@@ -77,7 +77,8 @@ app.get('/all', verifyToken, getPosts);
 
 // Get user posts route
 app.get('/user', verifyToken, getUserPosts);
-
+app.put('/edit/:id', verifyToken, updatePost);
+app.delete('/delete/:id', verifyToken, deletePost);
 // Comment route
 app.post('/comments', verifyToken, addComment);
 app.get('/comments/:postId', verifyToken, addComment);
